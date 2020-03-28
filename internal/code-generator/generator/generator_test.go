@@ -304,8 +304,8 @@ func (s *GeneratorTestSuite) TestGenerationFiles() {
 		assert.Equal(s.T(), expected, actual, "Test %s", test.name)
 		if expected != actual {
 			s.T().Logf("%s generated is different from %q", test.name, test.wantOut)
-			s.T().Logf("Expected %q", expected[:400])
-			s.T().Logf("Actual %q", actual[:400])
+			s.T().Logf("Expected %q", expected)
+			s.T().Logf("Actual %q", actual)
 		}
 
 	}
