@@ -107,45 +107,44 @@ func getFrequencies(samplesDir string) (*samplesFrequencies, error) {
 }
 
 func readSamples(samplesLangDir string) ([]string, error) {
-	const samplesLangFilesDir = "filenames"
-	sampleFiles, err := ioutil.ReadDir(samplesLangDir)
+	const specialSubDir = "filenames"
+	files, err := ioutil.ReadDir(samplesLangDir)
 	if err != nil {
 		return nil, err
 	}
 
 	var samples []string
-	for _, sampleFile := range sampleFiles {
-		filename := filepath.Join(samplesLangDir, sampleFile.Name())
-		if sampleFile.Mode().IsRegular() {
-			samples = append(samples, filename)
-			continue
-		}
-
-		if sampleFile.IsDir() && sampleFile.Name() == samplesLangFilesDir {
+	for _, f := range files {
+		filename := filepath.Join(samplesLangDir, f.Name())
+		if f.IsDir() && f.Name() == specialSubDir {
 			subSamples, err := readSubSamples(filename)
 			if err != nil {
 				return nil, err
 			}
-
 			samples = append(samples, subSamples...)
 		}
 
+		if f.IsDir() {
+			continue
+		}
+		samples = append(samples, filename)
 	}
 
 	return samples, nil
 }
 
 func readSubSamples(path string) ([]string, error) {
-	subSamples := []string{}
-	entries, err := ioutil.ReadDir(path)
+	var subSamples []string
+	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, entry := range entries {
-		if entry.Mode().IsRegular() {
-			subSamples = append(subSamples, filepath.Join(path, entry.Name()))
+	for _, f := range files {
+		if f.IsDir() {
+			continue
 		}
+		subSamples = append(subSamples, filepath.Join(path, f.Name()))
 	}
 
 	return subSamples, nil
