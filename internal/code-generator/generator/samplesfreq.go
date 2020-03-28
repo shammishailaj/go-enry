@@ -34,6 +34,7 @@ func Frequencies(fileToParse, samplesDir, outPath, tmplPath, tmplName, commit st
 
 	if _, ok := os.LookupEnv("ENRY_DEBUG"); ok {
 		log.Printf("Total samples: %d\n", freqs.LanguageTotal)
+		log.Printf("Total tokens: %d\n", freqs.TokensTotal)
 
 		keys := make([]string, 0, len(freqs.Languages))
 		for k := range freqs.Languages {
