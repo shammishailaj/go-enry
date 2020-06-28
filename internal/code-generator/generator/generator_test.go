@@ -9,14 +9,17 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/go-enry/go-enry/v2/internal/tokenizer"
+
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
 
 var (
 	linguistURL          = "https://github.com/github/linguist.git"
 	linguistClonedEnvVar = "ENRY_TEST_REPO"
-	commit               = "3a1bd3c3d3e741a8aaec4704f782e06f5cd2a00d"
+	commit               = "40992ba7f86889f80dfed3ba95e11e1082200bad"
 	samplesDir           = "samples"
 	languagesFile        = filepath.Join("lib", "linguist", "languages.yml")
 
@@ -85,6 +88,11 @@ var (
 	colorsGold         = filepath.Join(testDir, "colors.gold")
 	colorsTestTmplPath = filepath.Join(assetsDir, "colors.go.tmpl")
 	colorsTestTmplName = "colors.go.tmpl"
+
+	// colors test
+	groupsGold         = filepath.Join(testDir, "groups.gold")
+	groupsTestTmplPath = filepath.Join(assetsDir, "groups.go.tmpl")
+	groupsTestTmplName = "groups.go.tmpl"
 )
 
 type GeneratorTestSuite struct {
@@ -258,6 +266,16 @@ func (s *GeneratorTestSuite) SetupSuite() {
 			generate:    Colors,
 			wantOut:     colorsGold,
 		},
+		{
+			name:        "Groups()",
+			fileToParse: filepath.Join(s.tmpLinguist, languagesFile),
+			samplesDir:  "",
+			tmplPath:    groupsTestTmplPath,
+			tmplName:    groupsTestTmplName,
+			commit:      commit,
+			generate:    Groups,
+			wantOut:     groupsGold,
+		},
 	}
 }
 
@@ -302,7 +320,23 @@ func (s *GeneratorTestSuite) TestGenerationFiles() {
 		expected := normalizeSpaces(string(gold))
 		actual := normalizeSpaces(string(out))
 		assert.Equal(s.T(), expected, actual, "Test %s", test.name)
+		if expected != actual {
+			s.T().Logf("%s generated is different from %q", test.name, test.wantOut)
+			s.T().Logf("Expected %q", expected[:400])
+			s.T().Logf("Actual %q", actual[:400])
+		}
+
 	}
+}
+
+func (s *GeneratorTestSuite) TestTokenizerOnATS() {
+	const suspiciousSample = "samples/ATS/csv_parse.hats"
+	sFile := filepath.Join(s.tmpLinguist, suspiciousSample)
+	content, err := ioutil.ReadFile(sFile)
+	require.NoError(s.T(), err)
+
+	tokens := tokenizer.Tokenize(content)
+	assert.Equal(s.T(), 381, len(tokens), "Number of tokens using LF as line endings")
 }
 
 // normalizeSpaces returns a copy of str with whitespaces normalized.

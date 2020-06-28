@@ -328,15 +328,13 @@ func getInterpreter(data []byte) (interpreter string) {
 	return
 }
 
-func getFirstLine(data []byte) []byte {
-	buf := bufio.NewScanner(bytes.NewReader(data))
-	buf.Scan()
-	line := buf.Bytes()
-	if err := buf.Err(); err != nil {
-		return nil
+func getFirstLine(content []byte) []byte {
+	nlpos := bytes.IndexByte(content, '\n')
+	if nlpos < 0 {
+		return content
 	}
 
-	return line
+	return content[:nlpos]
 }
 
 func hasShebang(line []byte) bool {
@@ -470,4 +468,13 @@ func GetLanguageByAlias(alias string) (lang string, ok bool) {
 	}
 
 	return
+}
+
+// GetLanguageGroup returns language group or empty string if language does not have group.
+func GetLanguageGroup(language string) string {
+	if group, ok := data.LanguagesGroup[language]; ok {
+		return group
+	}
+
+	return ""
 }

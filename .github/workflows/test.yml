@@ -13,17 +13,23 @@ jobs:
       with:
         go-version: ${{ matrix.go-version }}
 
+    - name: Set git on win to use LF
+      run: |
+        git config --global core.autocrlf false
+        git config --global core.eol lf
     - name: Checkout code
       uses: actions/checkout@v2
     - name: Test
       run: go test ./...
+      env:
+        ENRY_DEBUG: 1
   test-oniguruma:
     strategy:
       matrix:
         go-version: [1.13.x, 1.14.x]
     runs-on: ubuntu-latest
     env:
-      ONIGURUMA_VERSION: 6.9.1
+      ONIGURUMA_VERSION: 6.9.4
     steps:
     - name: Install libonig5
       run: |
